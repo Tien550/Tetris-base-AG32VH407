@@ -1,0 +1,46 @@
+# PlatformIO build artifacts
+.pio/
+.pioenvs
+.piolibdeps
+.clang_complete
+.gcc-flags.json
+
+# IDE and Editor configurations
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.user
+*.userosv
+*.sln.docstates
+
+# FPGA/CPLD synthesis databases & temporary build outputs
+logic/db/
+logic/incremental_db/
+logic/alta_db/
+logic/alta_logs/
+logic/quartus_logs/
+logic/simulation/
+logic/logic_ip_log.txt
+*.rpt
+*.summary
+*.jdi
+*.pin
+*.done
+*.bak
+*.orig
+
+# Raw frame buffer dumps (can be regenerated with tools/img2rgb565.py)
+tools/*.raw
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+venv/
+
+# Operating system files
+Thumbs.db
+[Dd]esktop.ini
+.DS_Store

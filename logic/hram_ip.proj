@@ -1,0 +1,15 @@
+[GuiMigrateQuartusPage]
+verilogFiles=hram_ip.v
+
+[GuiMigrateSetupPage]
+[GuiMigrateSetupPage]
+design=hram_ip
+device=AGRV2KL64H
+flowInline=force
+
+[GuiMigrateRunPage]
+fitting=1
+fitter=5
+effort=2
+skew=2
+flow=0

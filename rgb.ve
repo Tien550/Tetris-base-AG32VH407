@@ -1,0 +1,86 @@
+# Pin mapping cho board AGM AG32VH407RCT6 (LQFP-64, AGRV2KL64H) "TCX" co cap ung.
+# Nguon: AGM cung cap, goi "agrv2kl64h_example_800x480_touch" -> 64pinH/mcu/HyperRAM/rgb/rgb.ve
+# (KHAC voi rgb.ve trong SDK examples/HyperRAM/rgb: SDK dung board tham chieu khac.)
+SYSCLK 150
+HSECLK 8
+
+# Clocks for HRAM. Frequency can be different from SYSCLK.
+# 150 MHz (khong phai 200): o 200 MHz khe dinh thoi giua mien SYSCLK va hbus_clk am -3.3 ns,
+# du lieu ghi vao HyperRAM bi sai bit (xac nhan bang kiem tra bo nho 29/10/2026).
+PLLCLK3 150
+PLLCLK4 150
+PLLCLK4_PHASE 90
+
+PLL_CLKOUT3 hbus_clk
+PLL_CLKOUT4 hbus_clk90
+
+# 3 LED tren board (silk LED2..LED4). Active-Low.
+GPIO4_1 PIN_54 # LED2
+GPIO4_2 PIN_53 # LED3
+GPIO4_3 PIN_52 # LED4
+
+UART0_UARTRXD PIN_43
+UART0_UARTTXD PIN_42
+
+GPIO6_2 PIN_51 # IO Button (SW2)
+
+hbus_rwds    HRAM_RWDS
+hbus_clk_out HRAM_CK:OUTPUT
+hbus_csn     HRAM_CSN:OUTPUT
+hbus_resetn  HRAM_RESETN:OUTPUT
+
+hbus_adq[0] HRAM_DQ0
+hbus_adq[1] HRAM_DQ1
+hbus_adq[2] HRAM_DQ2
+hbus_adq[3] HRAM_DQ3
+hbus_adq[4] HRAM_DQ4
+hbus_adq[5] HRAM_DQ5
+hbus_adq[6] HRAM_DQ6
+hbus_adq[7] HRAM_DQ7
+
+# RGB565 -> FPC1 (40 chan). Board khong co chan reset / DISP / SPI / EN cho LCD.
+rgb_hsync    PIN_20
+rgb_vsync    PIN_15
+rgb_de       PIN_16
+rgb_dclk     PIN_17
+
+# Du lieu RGB565 CHUAN: rgb_data[15:11]=Red, [10:5]=Green, [4:0]=Blue.
+# (ve cua AGM de nhom 'Red' o rgb_data[0..4], tuc la BGR565; da hoan doi de 0xF800 hien do.)
+# Blue (B3..B7 cua panel) -> rgb_data[0..4]
+rgb_data[0]  PIN_28
+rgb_data[1]  PIN_24
+rgb_data[2]  PIN_26
+rgb_data[3]  PIN_21
+rgb_data[4]  PIN_23
+# Green (G2..G7)
+rgb_data[5]  PIN_37
+rgb_data[6]  PIN_34
+rgb_data[7]  PIN_35
+rgb_data[8]  PIN_29
+rgb_data[9]  PIN_33
+rgb_data[10] PIN_27
+# Red (R3..R7 cua panel) -> rgb_data[11..15]
+rgb_data[11] PIN_40
+rgb_data[12] PIN_41
+rgb_data[13] PIN_38
+rgb_data[14] PIN_39
+rgb_data[15] PIN_36
+
+# Flash SPI ngoai W25Q16JV (2 MB). Da do bang chuong trinh (ID EF4015): CS=PIN_61, CLK=PIN_58, DI=PIN_59, DO=PIN_62.
+# Dung GPIO bit-bang. HOLD (PIN_57) va WP (PIN_2) keo len cao.
+GPIO3_0 PIN_57 # HOLD
+GPIO3_1 PIN_58 # CLK
+GPIO3_2 PIN_59 # MOSI (DI)
+GPIO3_3 PIN_61 # CS
+GPIO3_4 PIN_62 # MISO (DO)
+GPIO3_5 PIN_2  # WP
+
+# 4 nut nhan mo rong tren header H1:
+# H1 Pin 1 (PIN_9)  -> BTN_LEFT   (Sang trai)
+# H1 Pin 2 (PIN_10) -> BTN_ROTATE (Xoay khoi)
+# H1 Pin 3 (PIN_11) -> BTN_RIGHT  (Sang phai)
+# H1 Pin 4 (PIN_14) -> BTN_DROP   (Roi nhanh)
+GPIO2_0 PIN_9
+GPIO2_1 PIN_10
+GPIO2_2 PIN_11
+GPIO2_3 PIN_14

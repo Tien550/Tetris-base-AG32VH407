@@ -1,0 +1,65 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  code-quality:
+    name: Code Quality & Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Analysis Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck
+          pip install flake8
+
+      - name: Check Python Tool Syntax
+        run: |
+          python -m py_compile tools/img2rgb565.py
+          flake8 tools/img2rgb565.py --max-line-length=120 --ignore=E501,W503,E402
+
+      - name: Run Cppcheck Static Analysis
+        run: |
+          cppcheck --enable=warning,performance,portability \
+                   --inline-suppr \
+                   --suppress=missingIncludeSystem \
+                   --suppress=unusedFunction \
+                   --error-exitcode=0 \
+                   -I src \
+                   -I src/drivers/lcd \
+                   -I src/games/tetris \
+                   src/
+
+  repo-integrity:
+    name: Repository & Artifact Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Verify Core Deliverables
+        run: |
+          test -f README.md || (echo "Missing README.md" && exit 1)
+          test -f LICENSE || (echo "Missing LICENSE" && exit 1)
+          test -f platformio.ini || (echo "Missing platformio.ini" && exit 1)
+          test -f rgb.ve || (echo "Missing rgb.ve" && exit 1)
+          test -f logic/fifo2rgb.v || (echo "Missing logic/fifo2rgb.v" && exit 1)
+          test -f logic/hram_ip/hram_ip.vx || (echo "Missing pre-synthesized netlist hram_ip.vx" && exit 1)
+          test -f docs/hardware/SCH_AGRV2KL64H_2025-02-15_schematic.pdf || (echo "Missing schematic PDF" && exit 1)
+          test -f docs/images/board_hardware.jpg || (echo "Missing board hardware photo" && exit 1)
+          test -f docs/images/tetris_running.jpg || (echo "Missing running screen photo" && exit 1)
+          echo "All core deliverables and hardware references are verified!"
+

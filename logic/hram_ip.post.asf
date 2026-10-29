@@ -1,0 +1,13 @@
+# pio_begin  >>>>>> DO NOT MODIFY THIS SECTION! >>>>>>
+file mkdir hram_ip
+if { ! [file exists hram_ip/hram_ip.sdc] } {
+  file copy -force ./hram_ip_.sdc hram_ip/hram_ip.sdc
+}
+file copy -force ./hram_ip_.ve hram_ip/hram_ip.ve
+if { $MODE == "SYNPLICITY" || $MODE == "NATIVE" } {
+  file copy -force hram_ip.vqm hram_ip/hram_ip.vq
+} else {
+  file copy -force ./alta_db/flatten.vx hram_ip/hram_ip.vx
+}
+# pio_end    <<<<<< DO NOT MODIFY THIS SECTION! <<<<<<
+
