@@ -1,47 +1,96 @@
-# Gui anh RGB565 (.raw, 768000 byte) len man hinh HMI qua UART.
-#   .\tools\send_image.ps1 -File anh.raw -Port COM17 [-Baud 115200]
-# Giao thuc: gui "IMG!" -> cho board tra 'K' -> gui 768000 byte. Dong serial monitor truoc khi chay.
+# Stream an RGB565 raw image (.raw, 768,000 bytes) to the AGM HMI display over UART.
+# Usage:
+#   .\tools\send_image.ps1 -File image.raw -Port COM17 [-Baud 115200] [-Save]
+# Protocol: Sends "IMG!" (or "IMF!" with -Save) -> waits for 'K' -> streams 768,000 bytes.
+# Note: Ensure serial monitor is closed before running this script.
+
 param(
     [Parameter(Mandatory = $true)][string]$File,
     [string]$Port = "COM17",
     [int]$Baud = 115200,
-    [switch]$Save    # luu anh vao flash SPI ngoai lam anh khoi dong (board se tu hien khi bat nguon)
+    [switch]$Save    # Save image to external SPI flash as persistent splash screen
 )
+
+if (-not (Test-Path $File)) {
+    Write-Error "File not found: $File"
+    exit 1
+}
+
 $data = [System.IO.File]::ReadAllBytes($File)
-if ($data.Length -ne 768000) { Write-Error "File phai dung 768000 byte (hien $($data.Length))"; exit 1 }
+if ($data.Length -ne 768000) {
+    Write-Error "File size must be exactly 768,000 bytes (current size: $($data.Length))"
+    exit 1
+}
 
 $p = New-Object System.IO.Ports.SerialPort $Port, $Baud, 'None', 8, 'One'
-$p.ReadTimeout = 300; $p.WriteTimeout = 20000
-try { $p.Open() } catch { Write-Error "Khong mo duoc $Port (dong serial monitor?): $_"; exit 1 }
+$p.ReadTimeout = 300
+$p.WriteTimeout = 20000
+
+try {
+    $p.Open()
+} catch {
+    Write-Error "Failed to open $Port. Please ensure the serial monitor is closed: $_"
+    exit 1
+}
+
 try {
     $p.DiscardInBuffer()
-    $magic = "IMG!"; if ($Save) { $magic = "IMF!" }
+    $magic = if ($Save) { "IMF!" } else { "IMG!" }
     $hdr = [System.Text.Encoding]::ASCII.GetBytes($magic)
     $ok = $false
-    for ($try = 0; $try -lt 20 -and -not $ok; $try++) {     # board co the dang ve, thu lai toi da ~20 s
+
+    # Retry handshake for up to 20 attempts
+    for ($try = 0; $try -lt 20 -and -not $ok; $try++) {
         $p.Write($hdr, 0, 4)
         $t0 = Get-Date
         while (((Get-Date) - $t0).TotalMilliseconds -lt 1000) {
-            try { if ($p.ReadByte() -eq 75) { $ok = $true; break } } catch { }   # 75 = 'K'
+            try {
+                if ($p.ReadByte() -eq 75) { # ASCII 75 = 'K'
+                    $ok = $true
+                    break
+                }
+            } catch { }
         }
     }
-    if (-not $ok) { Write-Error "Board khong tra loi. Da nap firmware moi chua?"; exit 1 }
 
-    $chunk = 512; $sent = 0; $last = -1
+    if (-not $ok) {
+        Write-Error "Board did not respond to handshake. Is the firmware running?"
+        exit 1
+    }
+
+    $chunk = 512
+    $sent = 0
+    $last = -1
     while ($sent -lt $data.Length) {
         $n = [Math]::Min($chunk, $data.Length - $sent)
-        $p.Write($data, $sent, $n); $sent += $n
+        $p.Write($data, $sent, $n)
+        $sent += $n
         $pct = [int](100 * $sent / $data.Length)
-        if ($pct -ne $last -and $pct % 10 -eq 0) { Write-Host "$pct%"; $last = $pct }
+        if ($pct -ne $last -and $pct % 10 -eq 0) {
+            Write-Host "Progress: $pct%"
+            $last = $pct
+        }
     }
-    Write-Host "Da gui xong."
+    Write-Host "Transmission completed successfully."
+
     if ($Save) {
-        Write-Host "Dang luu vao flash (xoa + ghi + kiem tra, khoang 10-20 giay)..."
+        Write-Host "Saving to external SPI flash (erase + program + verify, ~10-20s)..."
         $p.ReadTimeout = 60000
         try {
             $r = $p.ReadByte()
-            if ($r -eq 83) { Write-Host "DA LUU: bat nguon lai se tu hien anh." }
-            else { Write-Error "Luu that bai (xem UART)."; exit 1 }
-        } catch { Write-Error "Khong nhan duoc xac nhan luu."; exit 1 }
+            if ($r -eq 83) { # ASCII 83 = 'S' (Success)
+                Write-Host "SAVED: Splash screen image will now automatically display on power-up."
+            } else {
+                Write-Error "Flash save failed (check UART log output)."
+                exit 1
+            }
+        } catch {
+            Write-Error "Timed out waiting for save confirmation from board."
+            exit 1
+        }
     }
-} finally { if ($p.IsOpen) { $p.Close() } }
+} finally {
+    if ($p.IsOpen) {
+        $p.Close()
+    }
+}
