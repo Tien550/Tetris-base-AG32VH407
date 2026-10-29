@@ -13,9 +13,12 @@ A complete, high-performance arcade Tetris game running on the **AGM AG32VH407 /
 ## 📸 Hardware & In-Game Showcase
 
 <p align="center">
-  <img src="docs/images/tetris_running.jpg" alt="Tetris Arcade running on 5.0 inch RGB LCD" width="48%">
+  <img src="docs/images/tetris_gameplay.jpg" alt="Tetris Arcade running on 5.0 inch RGB LCD" width="48%">
   &nbsp;&nbsp;
-  <img src="docs/images/board_hardware.jpg" alt="AGM AG32VH407 Development Board" width="48%">
+  <img src="docs/images/hardware_setup.jpg" alt="AGM AG32VH407 Full Hardware Setup with DAP-Link" width="48%">
+</p>
+<p align="center">
+  <img src="docs/images/board_tcx.jpg" alt="AGM AG32 TCX Development Board" width="85%">
 </p>
 
 ---

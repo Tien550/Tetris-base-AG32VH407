@@ -59,7 +59,8 @@ jobs:
           test -f logic/fifo2rgb.v || (echo "Missing logic/fifo2rgb.v" && exit 1)
           test -f logic/hram_ip/hram_ip.vx || (echo "Missing pre-synthesized netlist hram_ip.vx" && exit 1)
           test -f docs/hardware/SCH_AGRV2KL64H_2025-02-15_schematic.pdf || (echo "Missing schematic PDF" && exit 1)
-          test -f docs/images/board_hardware.jpg || (echo "Missing board hardware photo" && exit 1)
-          test -f docs/images/tetris_running.jpg || (echo "Missing running screen photo" && exit 1)
+          test -f docs/images/tetris_gameplay.jpg || (echo "Missing gameplay photo" && exit 1)
+          test -f docs/images/hardware_setup.jpg || (echo "Missing hardware setup photo" && exit 1)
+          test -f docs/images/board_tcx.jpg || (echo "Missing board photo" && exit 1)
           echo "All core deliverables and hardware references are verified!"
 
