@@ -4,6 +4,8 @@
 .piolibdeps
 .clang_complete
 .gcc-flags.json
+*.bin
+*.hex
 
 # IDE and Editor configurations
 .vscode/*
